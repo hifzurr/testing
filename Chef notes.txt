@@ -1,0 +1,175 @@
+Workstation --->>> Chef Server -->> Nodes.
+
+# wget https://packages.chef.io/files/stable/chef-server/12.17.33/el/7/chef-server-core-12.17.33-1.el7.x86_64.rpm
+
+# chef-server-ctl reconfigure
+
+# chef-server-ctl install chef-manage
+
+# chef-server-cli user-create chefadmin Young Gunner kells@gmail.com redhat --filename /home/mgk/chefadmin.pem
+
+# chef-server-ctl reconfigure
+
+# chef-manage-ctl reconfigure
+
+# chef-server-ctl user-create chefadmin Chef Administrator kells@gmail.com p@ssword --filename /home/kells/chefadmin.pem
+
+Now go to the browser and type https://ip-address and hit enter.
+
+Hosted Chef :- is "chef is service" provided and maintained by chef.  (URL : api.chef.io manage.chef.io)
+
+A workstation is a computer running the Chef Development Kit (Chef DK) that is used to author cookbooks, interact with the Chef server, and interact with nodes.
+
+The workstation is where users do most of their work, including:
+
+    Developing and testing cookbooks and recipes
+    Testing Chef code
+    Keeping the Chef repository synchronized with version source control
+    Configuring organizational policy, including defining roles and environments, and ensuring that critical data is stored in data bags
+    Interacting with nodes, as (or when) required, such as performing a bootstrap operation
+
+1. Chef Development Kit (ChefDK)
+knife : is a command-line tool that provides an interface between a local chef-repo and the Chef server. knife helps users to manage:
+
+    Nodes
+    Cookbooks and recipes
+    Roles, Environments, and Data Bags
+    Resources within various cloud environments
+    The installation of the chef-client onto nodes
+    Searching of indexed data on the Chef server
+2. Starter Kit
+
+a). The chef-repo is the repository structure in which cookbooks are authored, tested, and maintained:
+
+    Cookbooks contain recipes, attributes, custom resources, libraries, files, templates, tests, and metadata
+    The chef-repo should be synchronized with a version control system (such as git), and then managed as if it were source code
+
+b) knife.rb :	A knife.rb file is used to specify configuration details for knife.
+	This file is responsible for chef configuration and every time you run knife command the command first look at knife.rb and then it looks for the rest of the things so if you don't have knife.rb file then command will throw you an errer.
+
+
+c) user.pem : This file is responsible for the authentication between your chef workstation and chef server 
+
+#### on workstation download chefdk and install #####
+
+# wget ##################
+# chef -v 
+# knife -v
+
+
+
+Chef Recipes:
+
+# cd chef-server
+# chef generate cookbook myinfra
+# cd myinfra
+# cd recipes
+# vim default.rb
+
+
+package "tree" do
+ action :install
+end
+
+:wq
+
+# knife cookbook upload myinfra
+# knife cookbook list
+
+Now on the nodes run chef-client command.
+
+Common Resources:
+
+1. package resource block manages a package on the node , typically by installing it.
+
+packahe 'httpd' do
+ action :install
+end
+
+2. A service resource block manages the state of a service. for ex:
+
+service "tomcat" do
+ action :start
+end
+
+3. A cookbook_file resource block manages files by using files that exist within a cookbook's /files directory. for ex:
+
+cookbook_file '/var/www/customers/public_html/index.php' do
+ source 'index.html'
+ owner 'web_admin'
+ group 'web_admin'
+ mode  '0755'
+ action :create
+end
+
+4. An execute resource block typically executes a single command that is unique to the env in which a recipe will run. for ex
+
+execute 'apache_configtest' do
+ command '/usr/sbin/apachectl configtest'
+end
+
+'/usr/sbin/apachectl configtest' is command which test if the configuration files for apache are valid.
+
+Working with the CHef Guards:
+
+- not_if :- Prevent resource from executing when the condition returns true.
+- only_if :- Allow a resource from executing only if the condition return true.
+
+chef-apply is an executable program that runs a single recipe from the command line:
+$ chef-apply name_of_recipe.rb
+
+ex :
+
+vim git.rb
+
+package "git" do
+ action :install
+ not_if { ::File.exists?('/tmp/packt') }
+end
+
+# touch /tmp/packt (when you will delete this file then it will install.)
+# chef-apply git.rb
+# git --version
+
+Notes :
+knife cookbook create is the legacy way to create a cookbook, it builds the structure of a cookbook with all possible directories.
+
+chef generate cookbook is part of Chef-DK and aims at generating a testable cookbook structure with minimal directories to use in test-kitchen.
+Working with the chef Run_list:
+
+1. GUI 
+2. Knife Command 
+
+# knife node show chef.client
+# knife cookbook list
+# knife node run_list add chef.client recipe[apache] -->> to add 
+# knife node show chef.client
+# knife node run_list remove chef.client recipe[apache]  -->> to remove
+# knife node run_list -->> to check other options
+
+Roles and Environment Into:
+
+# knife role list 
+# knife environment list
+# cd roles/
+# cat starter.rb
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
